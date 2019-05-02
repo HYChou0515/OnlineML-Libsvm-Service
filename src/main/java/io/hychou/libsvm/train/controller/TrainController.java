@@ -1,5 +1,7 @@
 package io.hychou.libsvm.train.controller;
 
+import com.netflix.appinfo.InstanceInfo;
+import com.netflix.discovery.EurekaClient;
 import io.hychou.common.MessageResponseEntity;
 import io.hychou.common.exception.service.ServiceException;
 import io.hychou.entity.data.DataEntity;
@@ -9,19 +11,12 @@ import io.hychou.entity.parameter.KernelTypeEnum;
 import io.hychou.entity.parameter.LibsvmTrainParameterEntity;
 import io.hychou.entity.parameter.SvmTypeEnum;
 import io.hychou.libsvm.train.service.TrainService;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.io.IOException;
-import java.io.InputStream;
+import org.springframework.web.client.RestTemplate;
 
 import static io.hychou.common.Constant.SUCCESS_MESSAGE;
 
@@ -29,11 +24,16 @@ import static io.hychou.common.Constant.SUCCESS_MESSAGE;
 public class TrainController {
     private final TrainService trainService;
     private final ModelService modelService;
+    private final RestTemplate restTemplate;
+    private final EurekaClient discoveryClient;
 
     @Autowired
-    public TrainController(TrainService trainService, ModelService modelService) {
+    public TrainController(TrainService trainService, ModelService modelService,
+                           RestTemplate restTemplate, EurekaClient discoveryClient) {
         this.trainService = trainService;
         this.modelService = modelService;
+        this.restTemplate = restTemplate;
+        this.discoveryClient = discoveryClient;
     }
 
     @GetMapping(RequestMappingPath.SvmTrain)
@@ -57,21 +57,19 @@ public class TrainController {
                 .gamma(gamma).coef0(coef0).cacheSize(cacheSize)
                 .eps(eps).c(c).nu(nu).p(p).shrinking(shrinking).probability(probability).done();
         try {
-            CloseableHttpClient client = HttpClients.createDefault();
-            HttpGet httpGet = new HttpGet("http://localhost:9010/data/"+dataName);
-            HttpResponse response = client.execute( httpGet );
-            InputStream body = response.getEntity().getContent();
+            final InstanceInfo instance = discoveryClient.getNextServerFromEureka(
+                    "dataservice", false);
+            final byte[] dataBytes = restTemplate.getForObject(
+                    instance.getHomePageUrl() + "/data/"+dataName, byte[].class);
             DataEntity dataEntity = new DataEntity();
             dataEntity.setName(dataName);
-            dataEntity.setDataBytes(IOUtils.toByteArray(body));
-            //DataEntity dataEntity = dataService.readDataByName(dataName);
+            dataEntity.setDataBytes(dataBytes);
+
             ModelEntity modelEntity = trainService.svmTrain(dataEntity, libsvmTrainParameterEntity);
             modelEntity = modelService.createModel(modelEntity);
             return MessageResponseEntity.ok(modelEntity.getId(), SUCCESS_MESSAGE);
         } catch (ServiceException e) {
             return e.getMessageResponseEntity();
-        } catch (IOException e) {
-            return null;
         }
     }
 }
