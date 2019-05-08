@@ -1,17 +1,20 @@
 package io.hychou.libsvm.predict.controller;
 
+import com.netflix.appinfo.InstanceInfo;
+import com.netflix.discovery.EurekaClient;
 import io.hychou.common.exception.service.ServiceException;
 import io.hychou.entity.data.DataEntity;
-import io.hychou.data.service.DataService;
 import io.hychou.entity.model.ModelEntity;
-import io.hychou.libsvm.model.service.ModelService;
 import io.hychou.entity.parameter.LibsvmPredictParameterEntity;
-import io.hychou.libsvm.predict.service.PredictService;
 import io.hychou.entity.prediction.PredictionEntity;
+import io.hychou.libsvm.model.service.ModelService;
+import io.hychou.libsvm.predict.service.PredictService;
 import io.hychou.libsvm.prediction.service.PredictionService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -20,6 +23,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -36,13 +40,17 @@ public class PredictControllerTest {
     MockMvc mvc;
 
     @MockBean
-    private DataService dataService;
-    @MockBean
     private ModelService modelService;
     @MockBean
     private PredictService predictService;
     @MockBean
     private PredictionService predictionService;
+    @MockBean
+    private EurekaClient discoveryClient;
+    @MockBean
+    private RestTemplate restTemplate;
+    @MockBean
+    private InstanceInfo instance;
 
     private DataEntity a9a;
     private ModelEntity a9aModel;
@@ -84,7 +92,10 @@ public class PredictControllerTest {
     @Test
     public void svmTrain_theReturnProperResponseEntity() throws Exception {
         // Arrange
-        given(dataService.readDataByName(a9a.getName())).willReturn(a9a);
+        given(instance.getHomePageUrl()).willReturn("http://mock/url/");
+        given(discoveryClient.getNextServerFromEureka(Mockito.anyString(), Mockito.anyBoolean())).willReturn(instance);
+        given(restTemplate.getForObject(ArgumentMatchers.endsWith(a9a.getName()),
+                ArgumentMatchers.eq(byte[].class))).willReturn(a9a.getDataBytes());
         given(modelService.readModelById(a9aModel.getId())).willReturn(a9aModel);
         given(predictService.svmPredict(a9a, a9aModel, libsvmPredictParameterEntity)).willReturn(a9aPredictionNoId);
         given(predictionService.createPrediction(a9aPredictionNoId)).willReturn(a9aPrediction);
@@ -102,7 +113,10 @@ public class PredictControllerTest {
     @Test
     public void svmTrain_givenNoLibsvmPredictParameterEntity_theReturnProperResponseEntity() throws Exception {
         // Arrange
-        given(dataService.readDataByName(a9a.getName())).willReturn(a9a);
+        given(instance.getHomePageUrl()).willReturn("http://mock/url/");
+        given(discoveryClient.getNextServerFromEureka(Mockito.anyString(), Mockito.anyBoolean())).willReturn(instance);
+        given(restTemplate.getForObject(ArgumentMatchers.endsWith(a9a.getName()),
+                ArgumentMatchers.eq(byte[].class))).willReturn(a9a.getDataBytes());
         given(modelService.readModelById(a9aModel.getId())).willReturn(a9aModel);
         given(predictService.svmPredict(a9a, a9aModel, libsvmPredictParameterEntity)).willReturn(a9aPredictionNoId);
         given(predictionService.createPrediction(a9aPredictionNoId)).willReturn(a9aPrediction);
