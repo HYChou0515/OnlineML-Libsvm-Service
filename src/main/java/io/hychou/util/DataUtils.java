@@ -2,7 +2,7 @@ package io.hychou.util;
 
 import com.google.common.math.DoubleMath;
 import io.hychou.common.exception.IllegalArgumentException;
-import io.hychou.entity.data.IndexValue;
+import io.hychou.entity.data.IndexValueEntity;
 import libsvm.svm_node;
 
 import java.io.BufferedReader;
@@ -16,12 +16,12 @@ public class DataUtils {
     private DataUtils() {
     }
 
-    public static svm_node[] toSvmNodes(List<IndexValue> indexValueList) {
-        svm_node[] svmNodes = new svm_node[indexValueList.size()];
-        for(int i=0; i<indexValueList.size(); i++) {
+    public static svm_node[] toSvmNodes(List<IndexValueEntity> indexValueEntityList) {
+        svm_node[] svmNodes = new svm_node[indexValueEntityList.size()];
+        for(int i = 0; i< indexValueEntityList.size(); i++) {
             svmNodes[i] = new svm_node();
-            svmNodes[i].index = indexValueList.get(i).getIndex();
-            svmNodes[i].value = indexValueList.get(i).getValue();
+            svmNodes[i].index = indexValueEntityList.get(i).getIndex();
+            svmNodes[i].value = indexValueEntityList.get(i).getValue();
         }
         return svmNodes;
     }

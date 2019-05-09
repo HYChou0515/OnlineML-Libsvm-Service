@@ -21,5 +21,5 @@ public abstract class ServiceException extends Exception {
         return MessageResponseEntity.status(this.getHttpStatus(), this.getMessage()).build();
     }
 
-    abstract public HttpStatus getHttpStatus();
+    public abstract HttpStatus getHttpStatus();
 }

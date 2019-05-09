@@ -1,8 +1,9 @@
 package io.hychou.libsvm.train.controller;
 
+import com.netflix.appinfo.InstanceInfo;
+import com.netflix.discovery.EurekaClient;
 import io.hychou.common.exception.service.ServiceException;
 import io.hychou.entity.data.DataEntity;
-import io.hychou.data.service.DataService;
 import io.hychou.entity.model.ModelEntity;
 import io.hychou.libsvm.model.service.ModelService;
 import io.hychou.entity.parameter.KernelTypeEnum;
@@ -12,6 +13,8 @@ import io.hychou.libsvm.train.service.TrainService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -20,6 +23,7 @@ import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -40,7 +44,11 @@ public class TrainControllerTest {
     @MockBean
     private ModelService modelService;
     @MockBean
-    private DataService dataService;
+    private EurekaClient discoveryClient;
+    @MockBean
+    private RestTemplate restTemplate;
+    @MockBean
+    private InstanceInfo instance;
 
     private DataEntity a9a;
     private ModelEntity a9aModel;
@@ -90,7 +98,10 @@ public class TrainControllerTest {
     @Test
     public void svmTrain_theReturnProperResponseEntity() throws Exception {
         // Arrange
-        given(dataService.readDataByName(a9a.getName())).willReturn(a9a);
+        given(instance.getHomePageUrl()).willReturn("http://mock/url/");
+        given(discoveryClient.getNextServerFromEureka(Mockito.anyString(), Mockito.anyBoolean())).willReturn(instance);
+        given(restTemplate.getForObject(ArgumentMatchers.endsWith(a9a.getName()),
+                ArgumentMatchers.eq(byte[].class))).willReturn(a9a.getDataBytes());
         given(trainService.svmTrain(a9a, libsvmTrainParameterEntity)).willReturn(a9aModelNoId);
         given(modelService.createModel(a9aModelNoId)).willReturn(a9aModel);
 
