@@ -5,14 +5,14 @@ import io.hychou.common.SignificantField;
 import java.util.ArrayList;
 import java.util.List;
 
-public class IndexValue extends AbstractDataStructure {
+public class IndexValueEntity extends AbstractDataStructure {
     private int index;
     private double value;
 
-    public IndexValue() {
+    public IndexValueEntity() {
     }
 
-    public IndexValue(int index, double value) {
+    public IndexValueEntity(int index, double value) {
         this.index = index;
         this.value = value;
     }

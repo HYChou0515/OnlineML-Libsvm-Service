@@ -35,7 +35,7 @@ public class LoggerAspect {
     }
 
     @Around("execution(* io.hychou..dao.*Repository.*(..))")
-        public Object DaoLogMethod(final ProceedingJoinPoint joinPoint)
+        public Object daoLogMethod(final ProceedingJoinPoint joinPoint)
             throws Throwable {
             return logMethod(joinPoint, DAO_LAYER);
     }

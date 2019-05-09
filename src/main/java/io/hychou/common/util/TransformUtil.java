@@ -2,6 +2,7 @@ package io.hychou.common.util;
 
 import io.hychou.common.exception.service.ServiceException;
 import io.hychou.common.exception.service.servererror.MultipartFileCannotGetBytesException;
+import org.apache.commons.lang.NullArgumentException;
 import org.springframework.data.util.Pair;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,9 +22,10 @@ public class TransformUtil {
     }
 
     public static List<Pair> mergeTwoListToListOfPairs(List listA, List listB) {
-        assert Objects.nonNull(listA);
-        assert Objects.nonNull(listB);
-        assert listA.size() == listB.size() : "merged to lists must have same size";
+        if(Objects.isNull(listA) || Objects.isNull(listB))
+            throw new NullArgumentException("ListA or ListB is null");
+        if(listA.size() != listB.size())
+            throw new IllegalArgumentException("merged to lists must have same size");
         List<Pair> list = new ArrayList<>();
         for(int i = 0; i < listA.size(); i++) {
             list.add(Pair.of(listA.get(i), listB.get(i)));

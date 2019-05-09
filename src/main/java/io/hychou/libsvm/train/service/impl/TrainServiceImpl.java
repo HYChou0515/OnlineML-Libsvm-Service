@@ -5,7 +5,7 @@ import io.hychou.common.exception.service.clienterror.IllegalParameterException;
 import io.hychou.common.exception.service.servererror.FileSystemReadException;
 import io.hychou.common.exception.service.servererror.FileSystemWriteException;
 import io.hychou.entity.data.DataEntity;
-import io.hychou.entity.data.DataPoint;
+import io.hychou.entity.data.DataPointEntity;
 import io.hychou.entity.model.ModelEntity;
 import io.hychou.entity.parameter.LibsvmTrainParameterEntity;
 import io.hychou.libsvm.train.service.TrainService;
@@ -22,7 +22,7 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Vector;
 
-import static io.hychou.entity.data.DataPoint.parseDataPoint;
+import static io.hychou.entity.data.DataPointEntity.parseDataPoint;
 import static io.hychou.util.DataUtils.toSvmNodes;
 
 @Service
@@ -114,7 +114,7 @@ public class TrainServiceImpl implements TrainService {
             String line = fp.readLine();
             if (line == null) break;
 
-            DataPoint dataPoint = parseDataPoint(line);
+            DataPointEntity dataPoint = parseDataPoint(line);
             svm_node[] x = toSvmNodes(dataPoint.getX());
 
             vy.addElement(dataPoint.getY());

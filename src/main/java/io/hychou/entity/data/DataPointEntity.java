@@ -8,14 +8,14 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DataPoint extends AbstractDataStructure {
+public class DataPointEntity extends AbstractDataStructure {
     private Double y;
-    private List<IndexValue> x;
+    private List<IndexValueEntity> x;
 
-    public DataPoint() {
+    public DataPointEntity() {
     }
 
-    public DataPoint(Double y, List<IndexValue> x) {
+    public DataPointEntity(Double y, List<IndexValueEntity> x) {
         this.y = y;
         this.x = x;
     }
@@ -28,15 +28,15 @@ public class DataPoint extends AbstractDataStructure {
         this.y = y;
     }
 
-    public List<IndexValue> getX() {
+    public List<IndexValueEntity> getX() {
         return x;
     }
 
-    public void setX(List<IndexValue> x) {
+    public void setX(List<IndexValueEntity> x) {
         this.x = x;
     }
 
-    public static DataPoint parseDataPoint(String line) {
+    public static DataPointEntity parseDataPoint(String line) {
         if (line == null) {
             throw new NullPointerException("Unable to parse null string");
         }
@@ -44,7 +44,7 @@ public class DataPoint extends AbstractDataStructure {
         // split space and ignore duplicate spaces
         String[] tokens = line.split("\\s+");
         Double y = Double.parseDouble(tokens[0]);
-        List<IndexValue> x = new ArrayList<>(tokens.length - 1);
+        List<IndexValueEntity> x = new ArrayList<>(tokens.length - 1);
         int lastIndex = -1;
         for (int i = 1; i < tokens.length; i++) {
             String[] keyvalue = tokens[i].split(":");
@@ -59,10 +59,10 @@ public class DataPoint extends AbstractDataStructure {
                         index, lastIndex));
             }
             lastIndex = index;
-            IndexValue indexValue = new IndexValue(index, Double.parseDouble(keyvalue[1]));
-            x.add(indexValue);
+            IndexValueEntity indexValueEntity = new IndexValueEntity(index, Double.parseDouble(keyvalue[1]));
+            x.add(indexValueEntity);
         }
-        return new DataPoint(y, x);
+        return new DataPointEntity(y, x);
     }
 
     @Override
@@ -73,14 +73,14 @@ public class DataPoint extends AbstractDataStructure {
         return fields;
     }
 
-    public static List<DataPoint> listOf(byte[] dataByteArray) throws IOException {
+    public static List<DataPointEntity> listOf(byte[] dataByteArray) throws IOException {
         InputStream inputStream = new ByteArrayInputStream(dataByteArray);
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-        List<DataPoint> data = new ArrayList<>();
+        List<DataPointEntity> data = new ArrayList<>();
         while(reader.ready()) {
             String line = reader.readLine().trim();
             if( !line.equals(Constant.EMPTY_STRING)) {
-                data.add(DataPoint.parseDataPoint(line));
+                data.add(DataPointEntity.parseDataPoint(line));
             }
         }
         return data;

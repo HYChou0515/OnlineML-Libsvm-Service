@@ -5,7 +5,7 @@ import io.hychou.common.exception.service.clienterror.IllegalParameterException;
 import io.hychou.common.exception.service.servererror.ServerIOException;
 import io.hychou.common.exception.service.servererror.SvmLoadModelException;
 import io.hychou.entity.data.DataEntity;
-import io.hychou.entity.data.DataPoint;
+import io.hychou.entity.data.DataPointEntity;
 import io.hychou.entity.model.ModelEntity;
 import io.hychou.entity.parameter.LibsvmPredictParameterEntity;
 import io.hychou.libsvm.predict.service.PredictService;
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.*;
 
-import static io.hychou.entity.data.DataPoint.parseDataPoint;
+import static io.hychou.entity.data.DataPointEntity.parseDataPoint;
 import static io.hychou.util.DataUtils.toSvmNodes;
 import static libsvm.svm.svm_load_model;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -146,7 +146,7 @@ public class PredictServiceImpl implements PredictService {
             }
             if (line == null) break;
 
-            DataPoint dataPoint = parseDataPoint(line);
+            DataPointEntity dataPoint = parseDataPoint(line);
             double target = dataPoint.getY();
             svm_node[] x = toSvmNodes(dataPoint.getX());
 
